@@ -1,0 +1,221 @@
+import pygame
+
+WIDTH, HEIGHT = 1000, 800
+show_function = 1
+
+class Button:
+    def __init__(self, color, x, y, width, height, name):
+        self.color = color
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.show_function = False
+        self.name = name
+        self.value = None
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+    def draw(self):
+        pygame.draw.rect(screen, self.color, self.rect)
+        font = pygame.font.Font(None, 20)
+        text_name = font.render(f"{self.name:^{12}}", True, (255, 255, 255))
+        if self.name == " or/and":
+            screen.blit(text_name, (self.x - 5, self.y + self.height // 2.5))
+        else:
+            screen.blit(text_name, (self.x, self.y + self.height // 2.5))
+
+sidebar_buttons = [
+    Button((120, 0, 0), 30, 20, 60, 50, "-+/*="),
+    Button((120, 0, 0), WIDTH // 5 - 90, 20, 60, 50, " or/and")
+]
+
+pygame.init()
+pygame.display.set_caption("Learn To Code")
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+
+def draw_sidebar():
+    pygame.draw.rect(screen, (0, 0, 0), (0, 0, WIDTH // 5, HEIGHT))
+
+class Function():
+    def __init__(self, color, x, y, width, height, name, show, renameable=False):
+        self.color = color
+        self.name = name
+        self.x = x - width // 2
+        self.y = y - height
+        self.width = width
+        self.height = height
+        self.show = show
+        self.renameable = renameable
+        self.input = False
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.rect_draw = pygame.Rect(self.x, self.y, self.width, self.height)
+
+functions = [
+    Function((0, 0, 120), WIDTH // 10, 140, 150, 50, "Multiply", 1),
+    Function((0, 0, 120), WIDTH // 10, 220, 150, 50, "Divide", 1),
+    Function((0, 0, 120), WIDTH // 10, 300, 150, 50, "Add", 1),
+    Function((0, 0, 120), WIDTH // 10, 380, 150, 50, "Subtract", 1),
+    Function((0, 120, 0), WIDTH // 10, 460, 150, 50, " =", 1),
+    Function((0, 0, 120), WIDTH // 10, 540, 150, 50, "Value", 1, True),
+
+    Function((120, 120, 0), WIDTH // 10, 140, 150, 50, "OR", 2),
+    Function((120, 120, 0), WIDTH // 10, 220, 150, 50, "NOR", 2),
+    Function((120, 120, 0), WIDTH // 10, 300, 150, 50, "AND", 2),
+    Function((120, 120, 0), WIDTH // 10, 380, 150, 50, "NAND", 2),
+    Function((120, 120, 0), WIDTH // 10, 460, 150, 50, "Button", 2)
+]
+
+def draw_functions():
+    global show_function, input_active
+    for button in sidebar_buttons:
+        if button.show_function and button.name == "-+/*=":
+            show_function = 1
+        if button.show_function and button.name == " or/and":
+            show_function = 2
+
+        for function in functions:
+            if function.show == show_function:
+                pygame.draw.rect(screen, function.color, function.rect_draw)
+                if function.name in [" =", "=="]:
+                    font = pygame.font.Font(None, 40)
+                    text_name = font.render(f"{function.name:^{10}}", True, (255, 255, 255))
+                    screen.blit(text_name, (function.x + 25, function.y + function.height // 4))
+                else:
+                    font = pygame.font.Font(None, 20)
+                    text_name = font.render(f"{function.name:^{20}}", True, (255, 255, 255))
+                    screen.blit(text_name, (function.x + 25, function.y + function.height // 2.5))
+
+def draw_rects():
+    for rect in rects:
+        color, x, y, width, height, name = rect[0], rect[1], rect[2], rect[3], rect[4], rect[5]
+        pygame.draw.rect(screen, color, (x, y, width, height))
+        if name in [" =", "=="]:
+            font = pygame.font.Font(None, 40)
+            text_name = font.render(f"{name:^{10}}", True, (255, 255, 255))
+            screen.blit(text_name, (x + 25, y + height // 4))
+        else:
+            font = pygame.font.Font(None, 20)
+            text_name = font.render(f"{name:^{20}}", True, (255, 255, 255))
+            screen.blit(text_name, (x + 25, y + height // 2.5))
+        if rect[7] and not rect[9]:
+            pygame.draw.circle(screen, (0,0,0), (x, y), 10)
+            pygame.draw.circle(screen, (0,0,0), (x, y + height),10)
+            pygame.draw.circle(screen, (0,0,0), (x + width, y + height//2), 10)
+        if rect[7] and rect[9]:
+            pygame.draw.circle(screen, (0,0,0), (x + width, y + height//2), 10)
+        
+
+
+
+rects = []
+
+def main():
+    global WIDTH, HEIGHT, screen, show_function, clicks, input_string
+
+    offset_x = 0
+    offset_y = 0
+
+    renaming_rect = None  # Store the rectangle being renamed
+    input_active = False  # Flag to indicate renaming mode
+
+    one = False
+    run = True
+    while run:
+        screen.fill((40, 40, 40))
+        draw_sidebar()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.quit()
+                quit()
+            keys = pygame.key.get_pressed()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for function in functions:
+                    if function.rect.collidepoint(event.pos):
+                        if not one and function.show == show_function:
+                            
+                                
+#                                                                                                                                                             [11] input, [12] input2, [13], output
+#                                                                                                                       [6]is dragging, [7]is dragable,          [10]is being renamed
+                            rects.append([function.color, function.x, function.y, function.width, function.height, function.name, True, False, 1, function.renameable, False])
+                            offset_x = event.pos[0] - function.x
+                            offset_y = event.pos[1] - function.y
+                            one = True
+                for rect in rects:
+                    if not one and not rect[7]:
+                        if rect[1] <= pygame.mouse.get_pos()[0] <= rect[1] + rect[3] and rect[2] <= pygame.mouse.get_pos()[1] <= rect[2] + rect[4]:
+                            rect[6] = True
+                            offset_x = pygame.mouse.get_pos()[0] - rect[1]
+                            offset_y = pygame.mouse.get_pos()[1] - rect[2]
+                            one = True
+                for button in sidebar_buttons:
+                    if button.rect.collidepoint(event.pos):
+                        button.show_function = True
+                        for butn in sidebar_buttons:
+                            if button != butn:
+                                butn.show_function = False
+                        
+            if event.type == pygame.MOUSEBUTTONDOWN and keys[pygame.K_LSHIFT]:   
+                for rect in rects:
+                    if rect[1] <= pygame.mouse.get_pos()[0] <= rect[1] + rect[3] and rect[2] <= pygame.mouse.get_pos()[1] <= rect[2] + rect[4]:
+                        if rect[7]:
+                            rect[7] = False
+                        else:
+                            rect[7] = True
+            
+            
+            if event.type == pygame.MOUSEBUTTONDOWN and keys[pygame.K_LCTRL]:
+                for rect in rects:
+                    if rect[1] <= pygame.mouse.get_pos()[0] <= rect[1] + rect[3] and rect[2] <= pygame.mouse.get_pos()[1] <= rect[2] + rect[4] and rect[9]:  
+                        for rectangle in rects:
+                            rectangle[10] = False
+                        rect[10] = True
+                        input_active = True
+                        input_string = ""
+                        
+                        
+            if input_active:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        input_active = False
+                    elif event.key == pygame.K_BACKSPACE:
+                        input_string = input_string[:-1]
+                    else:
+                        input_string += event.unicode
+                for rect in rects:
+                    if rect[10]:
+                        rect[5] = input_string
+                    if not input_active:
+                        rect[10] = False
+
+            if event.type == pygame.MOUSEBUTTONUP:                             
+                for rect in rects:
+                    if pygame.mouse.get_pos()[0] <= WIDTH // 5 + offset_x and rect[6]:
+                        rect[6] = False
+                        rects.remove(rect)
+                    rect[6] = False
+                    one = False
+            
+            if keys[pygame.K_F11]:
+                pygame.quit()
+                if WIDTH == 1000 and HEIGHT == 800:
+                    WIDTH, HEIGHT = 1920, 1080
+                else:
+                    WIDTH, HEIGHT = 1000, 800
+                pygame.init()
+                screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+        for rect in rects:
+            if rect[6]:
+                rect[1] = pygame.mouse.get_pos()[0] - offset_x
+                rect[2] = pygame.mouse.get_pos()[1] - offset_y
+
+        for button in sidebar_buttons:
+            button.draw()
+        draw_rects()
+        draw_functions()
+        clock.tick(60)
+        pygame.display.flip()
+
+main()
